@@ -1,0 +1,32 @@
+Vibe Coding Hackathon Submission
+A lightweight storefront builder that helps small business owners track income and expenses using voice and photo input.
+License: MIT
+Hackathon: Vibe Coding
+🎯 Problem Statement
+Many small traders don't track their income or expenses and have no idea if they're making a profit.
+💡 Solution
+TrackProfit is a mobile/web app that uses voice or photo input to help business owners track income and expenses in real-time. The application provides:
+🎤 Voice Input: Record transactions by speaking
+📸 Receipt Scanning: Capture expenses by taking photos
+📊 Real-time Dashboard: See profit/loss at a glance
+📱 Mobile-First Design: Works on any device
+🎉 Celebration Moments: Delightful feedback for profit milestones
+🖥️ Demo
+Check out the live demo: TrackProfit Demo
+TrackProfit Demo
+🛠️ Technologies Used
+Frontend: HTML5, CSS3, JavaScript with Bootstrap 5
+UI Design: MGX for rapid interface design
+Charts: Chart.js for data visualization
+AI Integration: Claude.ai for receipt parsing and voice transcription
+Development: Cursor AI for code assistance
+✨ Features
+Voice Transaction Recording
+"Add income of $250 from product sale"
+"Record expense of $120 for supplies"
+Receipt Scanning
+Automatically extract vendor, amount, and date information from photos of receipts.
+Real-time Profit Tracking
+See your business performance at a glance with intuitive visualizations.
+Celebration Animations
+Enjoy delightful feedback when reaching profit milestones.

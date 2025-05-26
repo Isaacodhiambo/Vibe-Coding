@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TrackProfit - A lightweight storefront builder and financial tracker for small businesses.">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>TrackProfit - Lightweight Storefront Builder</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap @5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons @1.10.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f3f4f6;
+            color: var(--dark);
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
+        }
+        .transaction-item {
+            border-left: 4px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .transaction-item.income {
+            border-left-color: var(--success);
+        }
+        .transaction-item.expense {
+            border-left-color: var(--danger);
+        }
+        .transaction-item:hover {
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        .profit-indicator {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .profit-indicator.positive {
+            color: var(--success);
+        }
+        .profit-indicator.negative {
+            color: var(--danger);
+        }
+        .microphone-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s ease;
+        }
+        .microphone-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--primary-dark);
+        }
+        .microphone-btn.recording {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+        .camera-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: fixed;
+            bottom: 20px;
+            right: 90px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            transition: all 0.2s ease;
+        }
+        .camera-btn:hover {
+            transform: scale(1.1);
+            background-color: #e69009;
+        }
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+        /* Animation for new transactions */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .new-transaction {
+            animation: slideIn 0.3s ease-out;
+        }
+        /* Celebration animation */
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f59e0b;
+            opacity: 0;
+        }
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                top: -10px;
+                transform: translateX(0) rotateZ(0deg);
+            }
+            100% {
+                opacity: 0;
+                top: 100%;
+                transform: translateX(100px) rotateZ(360deg);
+            }
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+            .microphone-btn, .camera-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            .camera-btn {
+                right: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" aria-current="page" href="#">TrackProfit</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#transactions">Transactions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reports">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Welcome Message -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <h4 class="mb-1">Welcome back, Sarah!</h4>
+                                <p class="text-muted mb-0">Here's your business summary for today</p>
+                            </div>
+                            <div class="ms-auto">
+                                <button class="btn btn-primary">
+                                    <i class="bi bi-download me-2"></i>Export Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card h-100 stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="text-muted mb-0">Today's Income</h6>
+                                <h4 class="mb-0">$1,250.00</h4>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success-subtle text-success me-2">
+                                <i class="bi bi-arrow-up-short"></i>12%
+                            </span>
+                            <small class="text-muted">vs. yesterday</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card h-100 stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="text-muted mb-0">Today's Expenses</h6>
+                                <h4 class="mb-0">$450.00</h4>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger-subtle text-danger me-2">
+                                <i class="bi bi-arrow-up-short"></i>5%
+                            </span>
+                            <small class="text-muted">vs. yesterday</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="text-muted mb-0">Net Profit</h6>
+                                <h4 class="mb-0 profit-indicator positive">$800.00</h4>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success-subtle text-success me-2">
+                                <i class="bi bi-arrow-up-short"></i>15%
+                            </span>
+                            <small class="text-muted">vs. yesterday</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Chart and Recent Transactions -->
+        <div class="row mb-4">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title mb-0">Income vs. Expenses</h5>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-primary active">Week</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary">Month</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary">Year</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="profitChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title mb-0">Recent Transactions</h5>
+                            <a href="#" class="text-decoration-none">View All</a>
+                        </div>
+                        <div class="transaction-list">
+                            <div class="transaction-item income p-3 mb-2 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Product Sale</h6>
+                                        <small class="text-muted">10:30 AM</small>
+                                    </div>
+                                    <div class="text-success">+$250.00</div>
+                                </div>
+                            </div>
+                            <div class="transaction-item expense p-3 mb-2 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Supplier Payment</h6>
+                                        <small class="text-muted">09:15 AM</small>
+                                    </div>
+                                    <div class="text-danger">-$120.00</div>
+                                </div>
+                            </div>
+                            <div class="transaction-item income p-3 mb-2 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Service Fee</h6>
+                                        <small class="text-muted">Yesterday</small>
+                                    </div>
+                                    <div class="text-success">+$180.00</div>
+                                </div>
+                            </div>
+                            <div class="transaction-item expense p-3 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Utility Bill</h6>
+                                        <small class="text-muted">Yesterday</small>
+                                    </div>
+                                    <div class="text-danger">-$85.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Features Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4">Quick Actions</h5>
+                        <div class="row g-4">
+                            <div class="col-md-3 col-6">
+                                <div class="text-center">
+                                    <div class="feature-icon mx-auto">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </div>
+                                    <h6>Add Income</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="text-center">
+                                    <div class="feature-icon mx-auto">
+                                        <i class="bi bi-dash-lg"></i>
+                                    </div>
+                                    <h6>Add Expense</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="text-center">
+                                    <div class="feature-icon mx-auto">
+                                        <i class="bi bi-box-seam"></i>
+                                    </div>
+                                    <h6>Manage Inventory</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="text-center">
+                                    <div class="feature-icon mx-auto">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </div>
+                                    <h6>Generate Report</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Voice Input Button -->
+    <button class="microphone-btn" id="microphoneBtn">
+        <i class="bi bi-mic"></i>
+    </button>
+    <!-- Camera Input Button -->
+    <button class="camera-btn" id="cameraBtn">
+        <i class="bi bi-camera"></i>
+    </button>
+    <!-- Voice Input Modal -->
+    <div class="modal fade" id="voiceInputModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Voice Input</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-4">
+                        <i class="bi bi-mic text-primary" style="font-size: 4rem;"></i>
+                        <div class="mt-3" id="recordingStatus">Listening...</div>
+                        <div class="mt-2 text-muted small">Speak clearly to record your transaction</div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="alert alert-info" id="transcriptionResult">
+                            Try saying: "Add income of $250 from product sale" or "Record expense of $120 for supplies"
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveVoiceTransaction">Save Transaction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Camera Input Modal -->
+    <div class="modal fade" id="cameraInputModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Scan Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-4">
+                        <div id="cameraPreview" class="mb-3">
+                            <video id="video" width="100%" height="300" style="background-color: #000; border-radius: 8px;"></video>
+                            <canvas id="canvas" style="display: none;"></canvas>
+                        </div>
+                        <div id="capturedImageContainer" style="display: none;">
+                            <img id="capturedImage" class="img-fluid rounded" alt="Captured receipt">
+                            <div class="mt-3">
+                                <button class="btn btn-outline-secondary btn-sm" id="retakePhoto">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Retake
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3" id="scanningResult" style="display: none;">
+                        <div class="alert alert-info">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                            <span>Processing receipt...</span>
+                        </div>
+                    </div>
+                    <div class="mt-3" id="receiptData" style="display: none;">
+                        <div class="alert alert-success">
+                            <h6 class="mb-2">Receipt Details:</h6>
+                            <div class="row">
+                                <div class="col-6 text-start">Total Amount:</div>
+                                <div class="col-6 text-end fw-bold">$85.75</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 text-start">Date:</div>
+                                <div class="col-6 text-end">Today</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 text-start">Vendor:</div>
+                                <div class="col-6 text-end">Office Supplies Inc.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="capturePhoto">Capture</button>
+                    <button type="button" class="btn btn-success" id="saveReceiptData" style="display: none;">Save as Expense</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Celebration Animation Container -->
+    <div class="celebration" id="celebration"></div>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap @5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js "></script>
+    <script>
+        // Initialize Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('profitChart').getContext('2d');
+            const profitChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: [950, 1100, 1200, 900, 1250, 1500, 1300],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Expenses',
+                            data: [400, 450, 350, 500, 450, 550, 400],
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+            // Voice Input Modal
+            const microphoneBtn = document.getElementById('microphoneBtn');
+            const voiceInputModal = new bootstrap.Modal(document.getElementById('voiceInputModal'));
+            microphoneBtn.addEventListener('click', function() {
+                voiceInputModal.show();
+                simulateVoiceRecognition();
+            });
+            // Camera Input Modal
+            const cameraBtn = document.getElementById('cameraBtn');
+            const cameraInputModal = new bootstrap.Modal(document.getElementById('cameraInputModal'));
+            cameraBtn.addEventListener('click', function() {
+                cameraInputModal.show();
+                simulateCameraAccess();
+            });
+            // Simulate voice recognition
+            function simulateVoiceRecognition() {
+                const transcriptionResult = document.getElementById('transcriptionResult');
+                const recordingStatus = document.getElementById('recordingStatus');
+                const saveVoiceTransaction = document.getElementById('saveVoiceTransaction');
+                microphoneBtn.classList.add('recording');
+                setTimeout(() => {
+                    recordingStatus.textContent = "Processing...";
+                    setTimeout(() => {
+                        transcriptionResult.textContent = "Add income of $250 from product sale";
+                        recordingStatus.textContent = "Done! Please verify the transaction.";
+                        microphoneBtn.classList.remove('recording');
+                        saveVoiceTransaction.addEventListener('click', function() {
+                            addNewTransaction('Product Sale', '+$250.00', 'income');
+                            voiceInputModal.hide();
+                            showCelebration();
+                        });
+                    }, 1500);
+                }, 2000);
+            }
+            // Simulate camera access and receipt scanning
+            function simulateCameraAccess() {
+                const video = document.getElementById('video');
+                const captureBtn = document.getElementById('capturePhoto');
+                const cameraPreview = document.getElementById('cameraPreview');
+                const capturedImageContainer = document.getElementById('capturedImageContainer');
+                const scanningResult = document.getElementById('scanningResult');
+                const receiptData = document.getElementById('receiptData');
+                const saveReceiptData = document.getElementById('saveReceiptData');
+                const retakePhoto = document.getElementById('retakePhoto');
+                // Simulate camera stream
+                setTimeout(() => {
+                    // For demo purposes, we're not actually accessing the camera
+                    video.poster = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='24' text-anchor='middle' fill='%23fff'%3ECamera Preview%3C/text%3E%3C/svg%3E";
+                    captureBtn.addEventListener('click', function() {
+                        cameraPreview.style.display = 'none';
+                        capturedImageContainer.style.display = 'block';
+                        document.getElementById('capturedImage').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23555'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='24' text-anchor='middle' fill='%23fff'%3EReceipt Captured%3C/text%3E%3C/svg%3E";
+                        scanningResult.style.display = 'block';
+                        captureBtn.style.display = 'none';
+                        setTimeout(() => {
+                            scanningResult.style.display = 'none';
+                            receiptData.style.display = 'block';
+                            saveReceiptData.style.display = 'inline-block';
+                        }, 2000);
+                    });
+                    retakePhoto.addEventListener('click', function() {
+                        cameraPreview.style.display = 'block';
+                        capturedImageContainer.style.display = 'none';
+                        scanningResult.style.display = 'none';
+                        receiptData.style.display = 'none';
+                        captureBtn.style.display = 'inline-block';
+                        saveReceiptData.style.display = 'none';
+                    });
+                    saveReceiptData.addEventListener('click', function() {
+                        addNewTransaction('Office Supplies', '-$85.75', 'expense');
+                        cameraInputModal.hide();
+                    });
+                }, 1000);
+            }
+            // Add new transaction to the list
+            function addNewTransaction(title, amount, type) {
+                const transactionList = document.querySelector('.transaction-list');
+                const newTransaction = document.createElement('div');
+                newTransaction.className = `transaction-item ${type} p-3 mb-2 rounded new-transaction`;
+                newTransaction.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">${title}</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <div class="${type === 'income' ? 'text-success' : 'text-danger'}">${amount}</div>
+                    </div>
+                `;
+                transactionList.insertBefore(newTransaction, transactionList.firstChild);
+                // Update stats
+                updateStats(amount, type);
+            }
+            // Update statistics based on new transaction
+            function updateStats(amount, type) {
+                const numAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ''));
+                if (type === 'income') {
+                    const incomeElement = document.querySelector('.stats-card:nth-child(1) h4');
+                    const currentIncome = parseFloat(incomeElement.textContent.replace(/[^0-9.-]+/g, ''));
+                    incomeElement.textContent = `$${(currentIncome + numAmount).toFixed(2)}`;
+                } else {
+                    const expenseElement = document.querySelector('.stats-card:nth-child(2) h4');
+                    const currentExpense = parseFloat(expenseElement.textContent.replace(/[^0-9.-]+/g, ''));
+                    expenseElement.textContent = `$${(currentExpense + numAmount).toFixed(2)}`;
+                }
+                // Update profit
+                const incomeTotal = parseFloat(document.querySelector('.stats-card:nth-child(1) h4').textContent.replace(/[^0-9.-]+/g, ''));
+                const expenseTotal = parseFloat(document.querySelector('.stats-card:nth-child(2) h4').textContent.replace(/[^0-9.-]+/g, ''));
+                const profitElement = document.querySelector('.profit-indicator');
+                const profit = incomeTotal - expenseTotal;
+                profitElement.textContent = `$${profit.toFixed(2)}`;
+                if (profit > 0) {
+                    profitElement.classList.remove('negative');
+                    profitElement.classList.add('positive');
+                } else {
+                    profitElement.classList.remove('positive');
+                    profitElement.classList.add('negative');
+                }
+            }
+            // Celebration animation
+            function showCelebration() {
+                const celebration = document.getElementById('celebration');
+                celebration.style.display = 'block';
+                // Create confetti
+                for (let i = 0; i < 100; i++) {
+                    createConfetti(celebration);
+                }
+                // Hide celebration after animation completes
+                setTimeout(() => {
+                    celebration.style.display = 'none';
+                    celebration.innerHTML = '';
+                }, 3000);
+            }
+            function createConfetti(container) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                // Random position, color, and size
+                const left = Math.random() * 100;
+                const width = Math.random() * 10 + 5;
+                const height = Math.random() * 10 + 5;
+                const backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.left = `${left}%`;
+                confetti.style.width = `${width}px`;
+                confetti.style.height = `${height}px`;
+                confetti.style.backgroundColor = backgroundColor;
+                // Animation
+                const animationDuration = Math.random() * 3 + 2;
+                confetti.style.animation = `confettiFall ${animationDuration}s ease-in forwards`;
+                container.appendChild(confetti);
+            }
+        });
+    </script>
+</body>
+</html>
